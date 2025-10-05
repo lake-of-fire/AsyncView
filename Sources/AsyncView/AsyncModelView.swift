@@ -16,12 +16,14 @@ public struct AsyncModelView<Success, Content: View>: View {
             content: content
         )
         .onAppear {
-            Task {
+            Task { @MainActor in
                 await model.loadIfNeeded()
             }
         }
         .refreshable {
-            await model.load(forceRefreshRequested: true)
+            await Task { @MainActor in
+                await model.load(forceRefreshRequested: true)
+            }.value
         }
     }
 }
